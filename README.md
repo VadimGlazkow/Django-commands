@@ -157,6 +157,83 @@
     `<папка_проета>` -> `static` -> js
                                  `> img
     ```
+2. Вначале прописать: `{% load static %}`;
+3. В теге `head` прописать `<link rel="stylesheet" href="{% static <имя_приложения>/css/<имя_файла>.css %}">` ;
+4. Чтобы сработал `css` в глобальной папке, нужно в файле `settings.py` прописать:
+    ```
+    STATICFILES_DIRS = [
+        BASE_DIR / 'static',
+    ]
+    ```
+    
+# **Базы данных, ORM, модели**
+### **Создать БД**
+* В файле `models.py` нужно создать модель (то есть класс, описывающий БД):
+    ```py
+    from django.db import models
+    
+    # Create your models here.
+    
+    
+    class Movie(models.Model):
+        name = models.CharField(max_length=40)
+        rating = models.IntegerField(default=1)
+    ```
+
+* Создать инструкцию для БД: `python manage.py makemigrations`;
+* Для применения миграции: `python manage.py migrate`;
+* Откатить миграцию: `python3 manage.py migrate имя_приложения номер_миграции`;
+* `python manage.py showmigrations` - показать созданные миграции;
+
+### **Добавление записи в таюлицу**
+1. Устарновить библиотеку: `pip install ipython` (для удобной консоли);
+2. Установить библиотеку: `pip install django-extensions` (для вывода SQL кода);
+3. Добавляем в файл `settings.py`: 
+    ```py
+    INSTALLED_APPS = (
+        ...
+        'django_extensions',
+    )
+    ```
+4. Для работы в терминале: `python manage.py shell_plus --print-sql`;
+5. Добавить элементы: `Movie(name='Matrix', rating=85).save()` или `Movie.objects.create(name='Matrix', rating=85)`;
+6. Закрыть консоль - `exit()`;
+
+### **Выборка записей из таблицы**
+1. В файле `models.py` классе реализовать магический метод `__str__`;
+2. В консоли можно работать с `<Название_модели>.objects.all()`;
+3. Также можно обращаться к элементам строки:
+    ```py
+    elem = Movie.objects.all()[0]
+    elem.name  # Avatar
+    elem.rating  # 80
+    ```
+
+### **Изменение и удаление записей**
+* Изменение:
+    ```
+    obj = Movie.objects.all()[3]
+    obj.name = 'qwerty'
+    obj.save()
+    ```
+* Удаление:
+    ` Movie.objects.all()[3].delete()`
+
+### **фильтры данных при помощи `get` и `filter`**
+* `Movie.objects.filter(budget=1000)` - фильтр на равенство поля;
+* `Movie.objects.filter(budget__gt=1000)` - (>) фильтр на поле больше значения (great then);
+* `Movie.objects.filter(budget__lt=1000)` - (<) фильтр на поле меньше значения;
+* `Movie.objects.filter(budget__gte=1000)`- (>=) фильтр на поле больше либо равно значения;
+* `Movie.objects.filter(budget__lte=1000)` - (<=) фильтр на поле меньше либо равно значения;
+* `Movie.objects.exclude(budget=1000)` - фильтр на поле не равно значению;
+* `Movie.objects.filter(year__isnull=True)` - фильтр на поле пустое (False - не пустое);
+* `Movie.objects.filter(year__isnull=True, name=’Avatar’)` - фильтр на два поля (AND);
+* `Movie.objects.exclude(budget=1000).filter(name=’Avatar’)` - фильтр на два поля (AND);
+* `Movie.objects.filter(name__contains=’Avatar’)` поле содержит значение, чувствителен к регистру (кроме SQLite, для него не чувствителен);
+* `Movie.objects.filter(name__icontains=’Avatar’)` - поле содержит значение, не чувствителен к регистру;
+* `Movie.objects.filter(name__startswith=’a’)` поле начинается с “a”, `endswith` - заканчивается;
+* `Movie.objects.filter(id__in=[3,5,6])` выбираются все значения из списка;
+
 
 
 
